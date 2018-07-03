@@ -22,11 +22,11 @@ CHANNEL_NAME="$1"
 COUNTER=0
 MAX_RETRY=5
 TOKEN_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/token
+NETWORK_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/network
 MARBLES_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/marbles
 ASSET_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/asset
 CAT_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/cat
 INKWORK_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/inkwork
-GUIDE_CC_PATH=github.com/inklabsfoundation/inkchain/examples/chaincode/go/guide_credit
 ORDERER_CA=/opt/gopath/src/github.com/inklabsfoundation/inkchain/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 
 echo_b "Chaincode Path : " $CC_PATH
@@ -86,14 +86,15 @@ updateAnchorPeers() {
 installChaincode () {
     peer chaincode install -n token -v 1.0 -p ${TOKEN_CC_PATH} -o orderer.example.com:7050 >&log.txt
 
+    peer chaincode install -n network -v 1.0 -p ${NETWORK_CC_PATH} -o orderer.example.com:7050 >&log.txt
+
     #peer chaincode install -n marbles -v 1.0 -p ${MARBLES_CC_PATH} -o orderer.example.com:7050 >&log.txt
 
-    peer chaincode install -n asset -v 1.0 -p ${ASSET_CC_PATH} -o orderer.example.com:7050 >&log.txt
+    #peer chaincode install -n asset -v 1.0 -p ${ASSET_CC_PATH} -o orderer.example.com:7050 >&log.txt
 
     #peer chaincode install -n cat -v 1.0 -p ${CAT_CC_PATH} -o orderer.example.com:7050 >&log.txt
 
     #peer chaincode install -n inkwork -v 1.0 -p ${INKWORK_CC_PATH} -o orderer.example.com:7050 >&log.txt
-    #peer chaincode install -n guide -v 1.0 -p ${GUIDE_CC_PATH} -o orderer.example.com:7050 >&log.txt
     res=$?
     cat log.txt
     verifyResult $res "Chaincode token installation on remote peer0 has Failed"
@@ -104,12 +105,13 @@ installChaincode () {
 instantiateChaincode () {
     local starttime=$(date +%s)
     peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n token -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
+    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n network -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
     #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n marbles -v 1.0 -c '{"Args":["initMarble","marble1","blue","35","tom"]}' -P "OR ('Org1MSP.member')" >&log.txt
     #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n marbles -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
-    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n asset -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
+    #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n asset -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
     #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n cat -v 1.0 -c '{"Args":["init","5","5","6","60","INK","i07caf88941eafcaaa3370657fccc261acb75dfba"]}' -P "OR ('Org1MSP.member')" >&log.txt
     #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n inkwork -v 1.0 -c '{"Args":["init","i07caf88941eafcaaa3370657fccc261acb75dfba","INK"]}' -P "OR ('Org1MSP.member')" >&log.txt
-    #peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C ${CHANNEL_NAME} -n guide -v 1.0 -c '{"Args":["init"]}' -P "OR ('Org1MSP.member')" >&log.txt
+
     res=$?
     cat log.txt
     verifyResult $res "Chaincode instantiation on pee0.org1 on channel '$CHANNEL_NAME' failed"
